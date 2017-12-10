@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">FilmApp</string>
+    <string name="password">Password</string>
+    <string name="email">you@gmail.com</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_in_here">Already a user? Sign in here</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="sign_up_here">Not a user yet? Sign up here</string>
+    <string name="sign_in">Sign In</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+    <string name="welcome_to_your_film_list">Welcome to your film list!</string>
+</resources>
