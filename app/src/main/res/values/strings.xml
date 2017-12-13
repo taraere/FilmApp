@@ -9,4 +9,6 @@
     <string name="sign_in">Sign In</string>
     <string name="title_activity_profile">ProfileActivity</string>
     <string name="welcome_to_your_film_list">Welcome to your film list!</string>
+    <string name="log_out">Sign Out</string>
+    <string name="users_email">User\'s email</string>
 </resources>

@@ -44,6 +44,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         progressDialog      = new ProgressDialog(this);
         firebaseAuth        = FirebaseAuth.getInstance();
 
+        // check user is not already logged in
+        if (firebaseAuth.getCurrentUser() != null) {
+            // already logged in then start profile activity
+            finish();
+            startActivity(new Intent(this, ProfileActivity.class));
+        }
+
         buttonSignUp.setOnClickListener(this);
         textViewSignIn.setOnClickListener(this);
     }
@@ -92,9 +99,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (task.isSuccessful()) {
                             // user is successfully logged in
                             // start profile activity of user
-                            Toast.makeText(MainActivity.this, "Successful sign in!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "Successful "+ task.toString(), Toast.LENGTH_SHORT).show();
                             finish();
-                            startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+                            startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
                         }
                     }
                 }).addOnFailureListener(this, new OnFailureListener() {
