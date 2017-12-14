@@ -20,10 +20,10 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private EditText editTextEmail;
-    private EditText editTextPassword;
-    private Button buttonSignUp;
-    private TextView textViewSignIn;
+    private EditText    editTextEmail;
+    private EditText    editTextPassword;
+    private Button      buttonSignUp;
+    private TextView    textViewSignIn;
 
     private ProgressDialog progressDialog;
 
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (task.isSuccessful()) {
                             // user is successfully logged in
                             // start profile activity of user
-                            Toast.makeText(MainActivity.this, "Successful "+ task.toString(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, task.toString(), Toast.LENGTH_SHORT).show();
                             finish();
                             startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
                         }

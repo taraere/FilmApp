@@ -20,9 +20,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.tara.filmapp.data.FilmDatabase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,7 +33,9 @@ import static android.content.ContentValues.TAG;
 
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private FirebaseAuth firebaseAuth;
+    private FirebaseAuth        firebaseAuth;
+    private FirebaseDatabase    database;
+    private DatabaseReference   watchListDb;
 
     private TextView    textViewWatchAgain;
     private TextView    textViewHipster;
@@ -48,10 +52,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private String      plot;
     private String      imdbVotes;
     private String      poster;
-    private Boolean     successfulGet = false;
-
-    // database
-    private FilmDatabase FilmDb;
+    private String      successfulGet = "no";
 
     private TextView    textViewTitle;
     private TextView    textViewDirector;
@@ -73,7 +74,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
             startActivity(new Intent(this, LoginActivity.class));
         }
 
-        FirebaseUser user = firebaseAuth.getCurrentUser();
+        final FirebaseUser user = firebaseAuth.getCurrentUser();
 
         editTextSearch  = (EditText)    findViewById(R.id.editTextSearch);
         buttonSearch    = (Button)      findViewById(R.id.buttonSearch);
@@ -95,10 +96,43 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
         textViewEmail.setText("Welcome, " + user.getEmail());
         buttonSearch.setOnClickListener(this);
-        buttonWatchItAgain.setOnClickListener(this);
         buttonLogOut.setOnClickListener(this);
         textViewWatchAgain.setOnClickListener(this);
-        textViewHipster.setOnClickListener(this);
+        textViewHipster.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), SharedActivity.class));
+            }
+        });
+        buttonWatchItAgain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (successfulGet == "yes") {
+                    // add info to database
+                    database    = FirebaseDatabase.getInstance();
+                    watchListDb = database.getReference("WatchAgainList");
+
+                    // add film object to db
+                    Film aFilm = new Film(title, director, plot, imdbVotes, poster);
+                    watchListDb.child(title).setValue(aFilm,
+                            new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError,
+                                               DatabaseReference databaseReference) {
+                            if (databaseError != null) {
+                                Toast.makeText(getApplicationContext(), databaseError.getMessage(),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                    Toast.makeText(getApplicationContext(), "Film added, go have a look",
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "No film to add",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     @Override
@@ -119,14 +153,14 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         }
         if (v == buttonSearch) {
 
-            filmTitle = editTextSearch.getText().toString().trim().toLowerCase();
+            filmTitle = editTextSearch.getText().toString().trim().toLowerCase().replace(" ", "%20");
+
+            Log.d(TAG, "film title " + filmTitle);
 
             if (filmTitle.length() == 0) {
                 Toast.makeText(getApplicationContext(), "To search for films, write a title above",
                         Toast.LENGTH_SHORT).show();
-            }
-
-            else {
+            } else {
                 queue = Volley.newRequestQueue(this);
 
                 String endpoint = String.format("https://www.omdbapi.com/?t=%s" +
@@ -147,17 +181,17 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
                                     imageGet(poster, imageViewPoster);
 
-                                    textViewTitle.setText(      "Title: " + title);
-                                    textViewDirector.setText(   "Director: " + director);
-                                    textViewPlot.setText(       "Plot: " + plot);
-                                    textViewImdbVotes.setText(  "IMDB votes: " + imdbVotes);
+                                    textViewTitle.setText("Title: " + title);
+                                    textViewDirector.setText("Director: " + director);
+                                    textViewPlot.setText("Plot: " + plot);
+                                    textViewImdbVotes.setText("IMDB votes: " + imdbVotes);
 
                                     editTextSearch.setText("");
                                     linearLayoutSearch.setVisibility(View.VISIBLE);
                                     buttonWatchItAgain.setVisibility(View.VISIBLE);
 
-                                    successfulGet = true;
-                                    Toast.makeText(getApplicationContext(), "Found it!!! ",
+                                    successfulGet = "yes";
+                                    Toast.makeText(getApplicationContext(), "Found it! ",
                                             Toast.LENGTH_SHORT).show();
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -178,22 +212,12 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                     public void onErrorResponse(VolleyError error) {
                         Toast.makeText(getApplicationContext(), error.getMessage(),
                                 Toast.LENGTH_SHORT).show();
+                        successfulGet = "no";
                     }
                 });
 
                 // add request to RequestQueue
                 queue.add(stringRequest);
-            }
-        }
-        if (v == buttonWatchItAgain) {
-            // add info to database
-            FilmDb = FilmDatabase.getInstance(getApplicationContext());
-
-            if (successfulGet = true) {
-                FilmDb.addData(title, director,
-                        plot, imdbVotes, poster);
-            } else {
-                Toast.makeText(getApplicationContext(), "No film to add", Toast.LENGTH_SHORT).show();
             }
         }
     }

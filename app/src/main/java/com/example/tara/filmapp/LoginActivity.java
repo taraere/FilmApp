@@ -86,7 +86,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
 
         // valid for logging in
-        progressDialog.setMessage("Logging in...");
+        progressDialog.setMessage("Signing in...");
         progressDialog.show();
 
         // begin login
@@ -96,7 +96,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         progressDialog.dismiss();
                         if (task.isSuccessful()) {
-                            Toast.makeText(LoginActivity.this, "Successfully Signed In", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Successfully signed in", Toast.LENGTH_SHORT).show();
                             finish();
                             startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
                         }
