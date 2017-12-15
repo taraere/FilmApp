@@ -1,4 +1,4 @@
-package com.example.tara.filmapp;
+package com.example.tara.filmapp.data;
 
 import org.json.JSONObject;
 
