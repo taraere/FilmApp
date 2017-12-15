@@ -26,23 +26,19 @@ public class SharedActivity extends AppCompatActivity {
     private Button      button;
 
     // Firebase
-    private DatabaseReference mDatabase;
-    private FirebaseAuth mAuth;
     private FirebaseDatabase    database;
     private DatabaseReference   aDatabase;
 
     // var
     String otherUser;
+    ArrayList<String> otherFilms      = new ArrayList<>();
+    ArrayAdapter<String>  adapter     = new ArrayAdapter<>(this,
+            android.R.layout.simple_dropdown_item_1line, otherFilms);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shared);
-
-        // list rendering
-        final ArrayList<String>     otherFilms  = new ArrayList<>();
-        final ArrayAdapter<String>  adapter     = new ArrayAdapter<>(this,
-                android.R.layout.simple_dropdown_item_1line, otherFilms);
 
         // instantiate layout
         editText    = (EditText)    findViewById(R.id.editeTextOthers);
@@ -53,6 +49,9 @@ public class SharedActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // reset list if necessary
+                otherFilms  = new ArrayList<>();
+
                 // get search query and query Firebase
                 otherUser   = editText.getText().toString().trim();
                 database    = FirebaseDatabase.getInstance();

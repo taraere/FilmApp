@@ -62,7 +62,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         }
 
         if (v == textViewSignIn) {
-            // open signin activity
+            // open log in activity
             finish();
             startActivity(new Intent(this, LoginActivity.class));
         }
@@ -86,7 +86,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         }
 
         // valid to register
-
         progressDialog.setMessage("Registering User...");
         progressDialog.show();
 
