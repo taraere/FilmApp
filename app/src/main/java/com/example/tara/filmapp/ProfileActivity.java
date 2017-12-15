@@ -76,14 +76,16 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         }
 
         final FirebaseUser user = firebaseAuth.getCurrentUser();
+        final String userName = user.getEmail().replace("@", "").replace(".", "")
+                .replace("mail", "").replace("com", "");
 
+        // layout
         editTextSearch  = (EditText)    findViewById(R.id.editTextSearch);
         buttonSearch    = (Button)      findViewById(R.id.buttonSearch);
         textViewEmail   = (TextView)    findViewById(R.id.textViewUsersEmail);
         buttonLogOut    = (Button)      findViewById(R.id.buttonLogOut);
         textViewWatchAgain = (TextView) findViewById(R.id.textViewWatchAgain);
         textViewHipster = (TextView)    findViewById(R.id.textViewHipster);
-
         textViewTitle   = (TextView)    findViewById(R.id.textViewTitle);
         textViewDirector= (TextView)    findViewById(R.id.textViewDirector);
         textViewPlot    = (TextView)    findViewById(R.id.textViewPlot);
@@ -92,10 +94,11 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         buttonWatchItAgain=(Button)     findViewById(R.id.buttonWatchItAgain);
         linearLayoutSearch=(LinearLayout)findViewById(R.id.linearLayoutSearch);
 
+        // clear layout at beginning. Set parameters
         linearLayoutSearch.setVisibility(View.INVISIBLE);
         buttonWatchItAgain.setVisibility(View.INVISIBLE);
 
-        textViewEmail.setText("Welcome, " + user.getEmail());
+        textViewEmail.setText("Welcome, " + userName);
         buttonSearch.setOnClickListener(this);
         buttonLogOut.setOnClickListener(this);
         textViewWatchAgain.setOnClickListener(this);
@@ -105,13 +108,14 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                 startActivity(new Intent(getApplicationContext(), SharedActivity.class));
             }
         });
+        // add to Firebase database
         buttonWatchItAgain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (successfulGet == "yes") {
                     // add info to database
                     database    = FirebaseDatabase.getInstance();
-                    watchListDb = database.getReference("WatchAgainList");
+                    watchListDb = database.getReference(userName);
 
                     // add film object to db
                     Film aFilm = new Film(title, director, plot, imdbVotes, poster);
@@ -138,30 +142,33 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public void onClick(View v) {
+        // logout
         if (v == buttonLogOut) {
             firebaseAuth.signOut();
             finish();
             startActivity(new Intent(getApplicationContext(), LoginActivity.class));
         }
+        // direct to watch again list activity
         if (v == textViewWatchAgain) {
             Toast.makeText(getApplicationContext(), "See the films you want to watch over again",
                     Toast.LENGTH_SHORT).show();
             startActivity(new Intent(getApplicationContext(), WatchActivity.class));
         }
+        // direct to searching for other lists
         if (v == textViewHipster) {
             Toast.makeText(getApplicationContext(), "See your most liked and unknown films",
                     Toast.LENGTH_SHORT).show();
         }
         if (v == buttonSearch) {
-
+            // make search suitable for url
             filmTitle = editTextSearch.getText().toString().trim().toLowerCase().replace(" ", "%20");
 
-            Log.d(TAG, "film title " + filmTitle);
-
+            // exceptions
             if (filmTitle.length() == 0) {
                 Toast.makeText(getApplicationContext(), "To search for films, write a title above",
                         Toast.LENGTH_SHORT).show();
             } else {
+                // query json of the API
                 queue = Volley.newRequestQueue(this);
 
                 String endpoint = String.format("https://www.omdbapi.com/?t=%s" +
@@ -223,6 +230,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
+    // Rendering image function
     public void imageGet(String img, final ImageView imgV) {
         ImageRequest imageRequest = new ImageRequest(img, new Response.Listener<Bitmap>() {
             @Override

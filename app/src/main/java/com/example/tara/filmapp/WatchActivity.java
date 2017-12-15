@@ -19,6 +19,8 @@ import com.google.android.gms.appinvite.AppInviteInvitationResult;
 import com.google.android.gms.appinvite.AppInviteReferral;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,38 +33,45 @@ import java.util.List;
 
 public class WatchActivity extends AppCompatActivity {
 
+    // debug logs
     private static final String TAG = "WatchActivity " ;
-    private FirebaseDatabase    database;
-    private DatabaseReference   aDatabase;
+
+    // layout
     private ListView            listViewFilm;
     private Button              buttonShare;
+
+    // firebase
+    private FirebaseAuth        firebaseAuth;
+    private FirebaseDatabase    database;
+    private DatabaseReference   aDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_watch);
 
-//        // find the retained fragment as activity
-//        FragmentManager fm = getSupportFragmentManager();
-//
-//        WatchFragment fragment = new WatchFragment();
-//        FragmentTransaction ft = fm.beginTransaction();
-//        ft.replace(R.id.fragment_container, fragment, "WatchFragment");
-//        ft.commit();
+        // check user authentication and get username
+        firebaseAuth = FirebaseAuth.getInstance();
+        final FirebaseUser user = firebaseAuth.getCurrentUser();
+        final String userName = user.getEmail().replace("@", "").replace(".", "")
+                .replace("mail", "").replace("com", "");
 
+        // database related
         database    = FirebaseDatabase.getInstance();
-        aDatabase   = database.getReference();
+        aDatabase   = database.getReference(userName);
+
         // hold collection of films
         final ArrayList<String> list = new ArrayList<>();
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, list);
 
+        // layout
         listViewFilm= (ListView) findViewById(R.id.listViewFilm);
         buttonShare = (Button) findViewById(R.id.buttonShare);
 
+        // generate list
         listViewFilm.setAdapter(adapter);
-
-        aDatabase.child("WatchAgainList").addValueEventListener(new ValueEventListener() {
+        aDatabase.addValueEventListener(new ValueEventListener() {
             /**
              * method will invoke as soon as data is changed
              * @param dataSnapshot
@@ -86,6 +95,7 @@ public class WatchActivity extends AppCompatActivity {
             }
         });
 
+        // Share your list with a friend via dynamic linking
         buttonShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,9 +108,8 @@ public class WatchActivity extends AppCompatActivity {
                 startActivity(intent);
             }
 
+            // hardcoded a dynamic link provided by Firebase to find new users
             private String buildDynamicLink() {
-//                String path = FirebaseDynamicLinks.getInstance().createDynamicLink()
-//                        .setDynamicLinkDomain("m9guj.app.goo.gl");
                 return "https://m9guj.app.goo.gl/?" +
                         "link=" + /*link*/
                         "https://youtube.com/c/Melardev" +
